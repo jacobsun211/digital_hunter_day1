@@ -39,7 +39,6 @@ def validate(intel):
         logger.error(f'{intel},missing fields')
         log_event('error',f'error in intel service, {intel}, missing fields')
 
-        print('missing fields')
         intel = json.dumps(intel)
         producer.produce(intel, WRITING_TOPIC)
         return False
@@ -53,7 +52,14 @@ def validate(intel):
         producer.produce(intel, WRITING_TOPIC)
         return False
         
-    # TODO check if its in the destroyed targets
+    if not targets_bank.find_one({'entity_id': damage['entity_id']}): 
+        logger.error(f'{damage['entity_id']}, not exist in targets_bank, damage is impossible')
+        log_event('error',f'{damage['entity_id']}, not exist in targets_bank, damage is impossible')
+        # send to kafka
+        damage = json.dumps(damage)
+        producer.produce(damage, WRITING_TOPIC)
+        return False
+    
     return True
 
 def targets_bank_validate(intel):

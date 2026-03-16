@@ -5,7 +5,7 @@ import json
 from pymongo import MongoClient
 import os
 
-logger = logging.getLogger("intel service")
+logger = logging.getLogger("attack service")
 logging.basicConfig(filename='attack service', level=logging.INFO)
 
 
@@ -51,8 +51,14 @@ def validate(attack):
         producer.produce(attack, WRITING_TOPIC)
         return False
         
-    
-    # TODO check if its in the destroyed targets
+    if destroyed_targets.find({'entity_id': attack['entity_id']}):
+        logger.error(f'{attack['entity_id']}, already destroyed')
+        log_event('error',f'{attack['entity_id']}, already destroyed')
+        # send to kafka
+        attack = json.dumps(attack)
+        producer.produce(attack, WRITING_TOPIC)
+        return False
+
     return True
 
 def update(attack):
