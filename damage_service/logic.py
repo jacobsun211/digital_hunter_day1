@@ -4,6 +4,8 @@ import logging
 import json
 from pymongo import MongoClient
 import os
+from shared.type_validation import Damage
+from shared.mongo_connection import targets_bank, destroyed_targets
 
 logger = logging.getLogger("damage service")
 logging.basicConfig(filename='damage service', level=logging.INFO)
@@ -19,21 +21,12 @@ consumer = Consumer(conf)
 
 
 WRITING_TOPIC = os.getenv('WRITING_TOPIC', 'dlq_signals_intel')
-LISTENING_TOPIC = os.getenv('damage_SERVICE_LISTENING_TOPIC', 'damage')
+LISTENING_TOPIC = os.getenv('DAMAGE_SERVICE_LISTENING_TOPIC', 'damage')
 
 consumer.subscribe([LISTENING_TOPIC])
 
-MONGO_URI = os.getenv('MONGO_URI', 'mongodb://localhost:27017')
 
-MONGO_URI = 'mongodb://localhost:27017'
-client = MongoClient(MONGO_URI)
-
-db = client['digital_hunter1']
-destroyed_targets = db['destroyed_targets']
-targets_bank = db['targets_bank']
-damages = db['damages']
-
-def validate(damage):
+def validate(damage: Damage):
     if len(damage) < 4:
         damage['error'] = 'missing fileds'
         logger.error(f'{damage},missing fields')
@@ -51,7 +44,6 @@ def validate(damage):
         producer.produce(damage, WRITING_TOPIC)
         return False
         
-    
     return True
 
 def update(damage):

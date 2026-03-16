@@ -1,6 +1,6 @@
+from intel_service.logic import validate, targets_bank_validate, distance_calc, logger, consumer
 from shared.logger import log_event
 import json
-from intel_service.logic import validate, targets_bank_validate, distance_calc, logger, consumer
 
 
 def main():
@@ -20,13 +20,11 @@ def main():
         targets_bank_validate(intel)
         distance_calc(intel)
 
-    
 
 
-main()
+if __name__ == '__main__':
+    main()
 
-
-# python -m intel_service.main
 
 
 

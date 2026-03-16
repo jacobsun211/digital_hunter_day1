@@ -5,6 +5,8 @@ import json
 from pymongo import MongoClient
 from intel_service.haversine import haversine_km
 import os
+from shared.type_validation import Intel
+from shared.mongo_connection import targets_bank, destroyed_targets
 
 logger = logging.getLogger("intel service")
 logging.basicConfig(filename='intel service', level=logging.INFO)
@@ -24,41 +26,37 @@ LISTENING_TOPIC = os.getenv('INTEL_SERVICE_LISTENING_TOPIC', 'intel')
 
 consumer.subscribe([LISTENING_TOPIC])
 
-MONGO_URI = os.getenv('MONGO_URI', 'mongodb://localhost:27017')
 
-MONGO_URI = 'mongodb://localhost:27017'
-client = MongoClient(MONGO_URI)
 
-db = client['digital_hunter1']
-destroyed_targets = db['destroyed_targets']
-targets_bank = db['targets_bank']
+def validate(intel: Intel):
 
-def validate(intel):
     if len(intel) < 7: # if the intel has missing fields
         intel['error'] = 'missing fileds'
         logger.error(f'{intel},missing fields')
         log_event('error',f'error in intel service, {intel}, missing fields')
 
-        intel = json.dumps(intel)
-        producer.produce(intel, WRITING_TOPIC)
-        return False
+        damage = json.dumps(damage)
+        producer.produce(damage, WRITING_TOPIC)
+        return False # i have to return here, or it will crash trying to access intel['entity_id'] later, since it's missing :/
+
 
     if intel['entity_id'].startswith('TGT-UNKNOWN-'):
+        error = True
         intel['error'] = 'false entity'
         logger.error(f'{intel['entity_id']}, false entity')
         log_event('error',f'error in intel service, {intel['entity_id']}, false entity')
         
-        intel = json.dumps(intel)
-        producer.produce(intel, WRITING_TOPIC)
-        return False
         
     if not targets_bank.find_one({'entity_id': damage['entity_id']}): 
+        error = True
         logger.error(f'{damage['entity_id']}, not exist in targets_bank, damage is impossible')
         log_event('error',f'{damage['entity_id']}, not exist in targets_bank, damage is impossible')
-        # send to kafka
+        
+    if error:
         damage = json.dumps(damage)
         producer.produce(damage, WRITING_TOPIC)
         return False
+
     
     return True
 

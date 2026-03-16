@@ -4,7 +4,6 @@ from damage_service.logic import validate, update, logger, consumer
 
 
 
-    
 
 def main():
     while True:
@@ -22,6 +21,5 @@ def main():
             continue
         update(damage)
 
-main()
-
-# python -m damage_service_copy.main
+if __name__ == '__main__':
+    main()
