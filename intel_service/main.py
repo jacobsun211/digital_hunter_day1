@@ -5,7 +5,6 @@ from intel_service.logic import validate, targets_bank_validate, distance_calc, 
 
 def main():
     while True:
-        print('listening')
         intel = consumer.poll(1)
         if intel is None: continue
         if intel.error():

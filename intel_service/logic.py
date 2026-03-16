@@ -35,7 +35,6 @@ destroyed_targets = db['destroyed_targets']
 targets_bank = db['targets_bank']
 
 def validate(intel):
-    print('in validate')
     if len(intel) < 7: # if the intel has missing fields
         intel['error'] = 'missing fileds'
         logger.error(f'{intel},missing fields')
@@ -44,7 +43,6 @@ def validate(intel):
         print('missing fields')
         intel = json.dumps(intel)
         producer.produce(intel, WRITING_TOPIC)
-        print('sent to kafka error')
         return False
 
     if intel['entity_id'].startswith('TGT-UNKNOWN-'):
@@ -52,23 +50,19 @@ def validate(intel):
         logger.error(f'{intel['entity_id']}, false entity')
         log_event('error',f'error in intel service, {intel['entity_id']}, false entity')
         
-        print('false entity')
         intel = json.dumps(intel)
         producer.produce(intel, WRITING_TOPIC)
-        print('sent to kafka error')
         return False
-    
+        
     # TODO check if its in the destroyed targets
     return True
 
 def targets_bank_validate(intel):
     entity_id = intel['entity_id']
-    collection = db['targets_bank']
 
-    if not collection.find_one({'entity_id': entity_id}): # if its not in the targets bank
+    if not targets_bank.find_one({'entity_id': entity_id}): # if its not in the targets bank
         intel['priority_level'] = 99
         targets_bank.insert_one(intel)
-        print('inserted')
 
         logger.info(f'sent {entity_id} to mongo')
         log_event('info',f'sent {entity_id} to mongo')
