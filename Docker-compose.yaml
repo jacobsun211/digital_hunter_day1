@@ -29,47 +29,18 @@ services:
     ports:
       - "9092:9092"
     environment:
-      # Configure listeners for both docker and host communication
       KAFKA_LISTENERS: CONTROLLER://localhost:9091,HOST://0.0.0.0:9092,DOCKER://0.0.0.0:9093
       KAFKA_ADVERTISED_LISTENERS: HOST://localhost:9092,DOCKER://kafka:9093
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,DOCKER:PLAINTEXT,HOST:PLAINTEXT
-
-      # Settings required for KRaft mode
       KAFKA_NODE_ID: 1
       KAFKA_PROCESS_ROLES: broker,controller
       KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
       KAFKA_CONTROLLER_QUORUM_VOTERS: 1@localhost:9091
-
-      # Listener to use for broker-to-broker communication
       KAFKA_INTER_BROKER_LISTENER_NAME: DOCKER
-
-      # Required for a single node cluster
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
     networks:
       - digital_hunter1
 
-  # kafka:
-  #   image: confluentinc/cp-kafka:7.6.1
-  #   restart: unless-stopped
-  #   ports:
-  #     - "9092:9092"
-  #   environment:
-  #     CLUSTER_ID: "Mf_-9PUJQnCI6eQZzgFTlg"
-  #     KAFKA_NODE_ID: 1
-  #     KAFKA_PROCESS_ROLES: "broker,controller"
-  #     KAFKA_CONTROLLER_QUORUM_VOTERS: "1@kafka:9093"
-  #     KAFKA_LISTENERS: "PLAINTEXT://0.0.0.0:29092,PLAINTEXT_HOST://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093"
-  #     KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092"
-  #     KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT,CONTROLLER:PLAINTEXT"
-  #     KAFKA_INTER_BROKER_LISTENER_NAME: "PLAINTEXT"
-  #     KAFKA_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
-  #     KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-  #     KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
-  #     KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
-  #     KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
-  #     KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
-  #   networks:
-  #     - digital_hunter1
 
 
   kafka-ui:
