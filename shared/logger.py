@@ -24,6 +24,7 @@ import os
 # Initialize Elasticsearch client
 # Ensure the host 'localhost' matches your docker-compose configuration
 # TODO add os.getenv, to elasticsearch
+elastic_host = os.getenv('ELASTIC_HOST','http://localhost:9200')
 es = Elasticsearch(['http://localhost:9200'])
 
 
