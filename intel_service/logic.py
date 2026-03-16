@@ -19,10 +19,9 @@ producer = Producer({'bootstrap.servers': SERVER})
 consumer = Consumer(conf)
 
 
-WRITING_TOPIC = os.getenv('INTEL_SERVICE_WRITING_TOPIC', 'dlq_signals_intel')
+WRITING_TOPIC = os.getenv('WRITING_TOPIC', 'dlq_signals_intel')
 LISTENING_TOPIC = os.getenv('INTEL_SERVICE_LISTENING_TOPIC', 'intel')
 
-LISTENING_TOPIC = 'intel'
 consumer.subscribe([LISTENING_TOPIC])
 
 MONGO_URI = os.getenv('MONGO_URI', 'mongodb://localhost:27017')

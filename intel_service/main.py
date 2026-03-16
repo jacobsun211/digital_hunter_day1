@@ -8,13 +8,12 @@ def main():
         intel = consumer.poll(1)
         if intel is None: continue
         if intel.error():
-            logger.error('error in intel service, trying to pull from kafka')
-            log_event('error','error in intel service, trying to pull from kafka')
+            logger.error('error trying to pull from kafka')
+            log_event('error','error trying to pull from kafka')
         try:
             intel = json.loads(intel.value().decode("utf-8"))
-        except (json.JSONDecodeError): # to catch intel that was sent in bytes and not in json
+        except json.JSONDecodeError: # to catch intel that was sent in bytes and not in json
             continue
-        print(intel)
         if not validate(intel):
             continue
 
