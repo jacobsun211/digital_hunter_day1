@@ -1,6 +1,6 @@
+from attack_service.logic import validate, update, logger, consumer
 from shared.logger import log_event
 import json
-from attack_service.logic import validate, update, logger, consumer
 
 
 
@@ -22,6 +22,6 @@ def main():
             continue
         update(attack)
 
-main()
+if __name__ == '__main__':
+    main()
 
-# python -m attack_service.main

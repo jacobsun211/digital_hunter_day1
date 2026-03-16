@@ -66,10 +66,48 @@ services:
     networks:
       - digital_hunter1
 
+  intel_service:
+    build:
+      context: .
+      dockerfile: intel_service/Dockerfile
+    restart: unless-stopped
+    env_file: .env
+    depends_on:
+    - kafka
+    - mongo
+    networks:
+    - digital_hunter1
+
+  attack_service:
+    build:
+      context: .
+      dockerfile: attack_service/Dockerfile
+    restart: unless-stopped
+    env_file: .env
+    depends_on:
+    - kafka
+    - mongo
+    networks:
+    - digital_hunter1
+      
+  damage_service:
+    build:
+      context: .
+      dockerfile: damage_service/Dockerfile
+    restart: unless-stopped
+    env_file: .env
+    depends_on:
+    - kafka
+    - mongo
+    networks:
+    - digital_hunter1
+
 
 networks:
   digital_hunter1:
     driver: bridge
+
+
 
 volumes:
   mongo-data:

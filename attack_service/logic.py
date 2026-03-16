@@ -1,11 +1,13 @@
+from shared.mongo_connection import targets_bank, destroyed_targets, attacks
+from shared.type_validation import Attack
 from confluent_kafka import Consumer, Producer
 from shared.logger import log_event
 import logging
 import json
-from pymongo import MongoClient
 import os
 
-logger = logging.getLogger("intel service")
+
+logger = logging.getLogger("attack service")
 logging.basicConfig(filename='attack service', level=logging.INFO)
 
 
@@ -23,17 +25,9 @@ LISTENING_TOPIC = os.getenv('ATTACK_SERVICE_LISTENING_TOPIC', 'attack')
 
 consumer.subscribe([LISTENING_TOPIC])
 
-MONGO_URI = os.getenv('MONGO_URI', 'mongodb://localhost:27017')
 
-MONGO_URI = 'mongodb://localhost:27017'
-client = MongoClient(MONGO_URI)
 
-db = client['digital_hunter1']
-destroyed_targets = db['destroyed_targets']
-targets_bank = db['targets_bank']
-attacks = db['attacks']
-
-def validate(attack):
+def validate(attack: Attack):
     if len(attack) < 4:
         attack['error'] = 'missing fileds'
         logger.error(f'{attack},missing fields')
@@ -46,13 +40,18 @@ def validate(attack):
     if not targets_bank.find_one({'entity_id': attack['entity_id']}): # if its not in the targets bank
         logger.error(f'{attack['entity_id']}, not exist in targets_bank, attack is impossible')
         log_event('error',f'{attack['entity_id']}, not exist in targets_bank, attack is impossible')
-        # send to kafka
+        error = True
+        
+    if destroyed_targets.find({'entity_id': attack['entity_id']}):
+        logger.error(f'{attack['entity_id']}, already destroyed')
+        log_event('error',f'{attack['entity_id']}, already destroyed')
+        error = True
+        
+    if error:
         attack = json.dumps(attack)
         producer.produce(attack, WRITING_TOPIC)
         return False
-        
-    
-    # TODO check if its in the destroyed targets
+
     return True
 
 def update(attack):
